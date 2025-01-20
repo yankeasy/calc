@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Renova Desk</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #00A39C;
+            --secondary: #00666a;
+            --accent: #a33800;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: white;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .logo {
+            width: 150px;
+            margin-right: 20px;
+        }
+
+        .logo-placeholder {
+            background-color: var(--primary);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        h1 {
+            color: var(--secondary);
+            margin-bottom: 30px;
+        }
+
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: var(--secondary);
+        }
+
+        .result {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .result h3 {
+            color: var(--secondary);
+            margin-bottom: 15px;
+        }
+
+        .info-card {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+            border: 2px solid var(--primary);
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .calculator-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo-placeholder">
+                <img src="logo.png" width="120" height=auto />
+            </div>
+            <h1>Calculadora Renova Desk</h1>
+        </header>
+
+        <div class="calculator-grid">
+            <div class="form-group">
+                <label for="dataRenovacao">Data para Renovação</label>
+                <input type="date" id="dataRenovacao">
+            </div>
+
+            <div class="form-group">
+                <label for="valorAtual">Valor Atual</label>
+                <input type="number" id="valorAtual" step="0.01" value="739.32">
+            </div>
+
+            <div class="form-group">
+                <label for="igpm">Índice IGPM</label>
+                <input type="text" id="igpm" value="6,54%" disabled style="background-color: #f5f5f5; color: #666;">
+            </div>
+        </div>
+
+        <button onclick="calcular()">Calcular</button>
+
+        <div class="result" id="resultado">
+            <h3>Resultados</h3>
+            <div class="result-item">
+                <span>Dias Faltantes até 31/12/2025:</span>
+                <span id="diasFaltantes">0</span>
+            </div>
+            <div class="result-item">
+                <span>Valor com IGPM:</span>
+                <span>R$ <span id="valorIGPM">0,00</span></span>
+            </div>
+            <div class="result-item">
+                <span>Valor com PRO-RATA:</span>
+                <span>R$ <span id="valorProRata">0,00</span></span>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <h3>Informações Importantes</h3>
+            <p>Data para descontinuação do Desktop: 31/12/2025</p>
+        </div>
+
+        <div class="warning">
+            <strong>Atenção:</strong> Certifique-se de verificar a data de renovação e o valor atual do contrato antes de realizar os cálculos.
+        </div>
+    </div>
+
+    <script>
+        function formatarMoeda(valor) {
+            return valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function calcularDiasEntreDatas(data1, data2) {
+            const diffTime = Math.abs(data2 - data1);
+            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        }
+
+        function calcular() {
+            const dataRenovacao = new Date(document.getElementById('dataRenovacao').value);
+            const valorAtual = parseFloat(document.getElementById('valorAtual').value);
+            const igpm = 0.0654; // IGPM fixo em 6,54%
+
+            // Data de descontinuação fixa: 31/12/2025
+            const dataDescontinuacao = new Date('2025-12-31');
+            
+            // Calcula dias entre a data de renovação e a data de descontinuação
+            const diasFaltantes = calcularDiasEntreDatas(dataRenovacao, dataDescontinuacao);
+            
+            const valorComIGPM = valorAtual * (1 + igpm);
+            const valorProRata = (valorComIGPM / 365) * diasFaltantes;
+
+            document.getElementById('diasFaltantes').textContent = diasFaltantes;
+            document.getElementById('valorIGPM').textContent = formatarMoeda(valorComIGPM);
+            document.getElementById('valorProRata').textContent = formatarMoeda(valorProRata);
+        }
+
+        // Definir data atual como valor padrão no campo de data
+        document.addEventListener('DOMContentLoaded', function() {
+            const hoje = new Date();
+            const dataFormatada = hoje.toISOString().split('T')[0];
+            document.getElementById('dataRenovacao').value = dataFormatada;
+        });
+    </script>
+</body>
+</html>
